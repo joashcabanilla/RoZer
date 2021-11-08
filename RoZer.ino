@@ -3,16 +3,20 @@
 AF_DCMotor motor1(3);
 AF_DCMotor motor2(4);
 
-char command = ' '; 
-const unsigned long baudRateBT = 9600;
+char command = ' ';
+char mapping = 'N';
+char mapp[5000];  
+int mapp_len;
 
 void setup() 
 {       
   Serial.begin(9600);
-  bt_serial.begin(baudRateBT);
+  bt_serial.begin(9600);
   motor1.setSpeed(120);
   motor2.setSpeed(120);
   Stop();
+  memset(mapp, 0, sizeof mapp);
+  mapp_len = 0;
 }
 
 void loop()
@@ -20,16 +24,9 @@ void loop()
   if(bt_serial.available())
   {
     command = bt_serial.read();
-    Serial.write(command);
-    movement();
+    command == 'W' ? mapping = 'Y' : command == 'w' ? mapping = 'N': ' ';
+    command != 'D' ? mapping == 'Y' ? Mapping(): movement():Disconnected();
   }
-    
-  if(Serial.available())
-  {
-    command = Serial.read();
-    bt_serial.write(command);
-    movement();
-  }  
 }
 
 void movement()
@@ -88,4 +85,17 @@ void Stop()
 {
   motor1.run(RELEASE);
   motor2.run(RELEASE);
+}
+
+void Disconnected()
+{
+  Stop();
+  memset(mapp, 0, sizeof mapp);
+}
+
+void Mapping()
+{
+  movement();
+  mapp_len = sizeof(mapp) / sizeof(char);
+  mapp[mapp_len+1] = command;
 }
