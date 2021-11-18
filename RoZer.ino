@@ -1,8 +1,10 @@
 #include <AFMotor.h>
 #include <EEPROM.h>
 #define bt_serial Serial1
-AF_DCMotor motor1(3);
-AF_DCMotor motor2(4);
+AF_DCMotor motor1(1, MOTOR12_1KHZ); 
+AF_DCMotor motor2(2, MOTOR12_1KHZ);
+AF_DCMotor motor3(3, MOTOR34_1KHZ);
+AF_DCMotor motor4(4, MOTOR34_1KHZ);
 
 char command = ' ';
 char mapping = 'N';
@@ -13,8 +15,8 @@ void setup()
 {       
   Serial.begin(9600);
   bt_serial.begin(9600);
-  motor1.setSpeed(120);
-  motor2.setSpeed(120);
+  motor1.setSpeed(255);
+  motor2.setSpeed(255);
   EEPROM.read(0) != 0 ? Saved_mapping() : movement();  
   address = 0;
 }
@@ -39,35 +41,32 @@ void loop()
 
 void movement()
 {
-  if(command == 'F')
-  {
-    forward();
-  }
-  
-  if(command == 'B')
-  {
-    backward();
-  }
-  
-  if(command == 'L')
-  {
-    left();
-  }
-  
-  if(command == 'R')
-  {
-    right();
-  }
-  
-  if(command == 'S')
-  {
-    Stop();
-  }
+  motor1.setSpeed(255);
+  motor2.setSpeed(255);
+  motor3.setSpeed(255);
+  motor4.setSpeed(255);
+  Stop();
+  switch(command){
+    case 'F':  
+      forward();
+      break;
+    case 'B':  
+       backward();
+      break;
+    case 'L':  
+      left();
+      break;
+    case 'R':
+      right();
+      break;
+    }
 }
 void forward()
 {
   motor1.run(FORWARD);
   motor2.run(FORWARD);
+  motor3.run(FORWARD);
+  motor4.run(FORWARD); 
   movement_num = 1;
 }
 
@@ -75,13 +74,17 @@ void backward()
 {
   motor1.run(BACKWARD);
   motor2.run(BACKWARD);
+  motor3.run(BACKWARD);
+  motor4.run(BACKWARD);
   movement_num = 2;
 }
 
 void left()
 {
   motor1.run(BACKWARD);
-  motor2.run(FORWARD); 
+  motor2.run(FORWARD);
+  motor3.run(BACKWARD);
+  motor4.run(FORWARD); 
   movement_num = 3;
 }
 
@@ -89,6 +92,8 @@ void right()
 {
   motor1.run(FORWARD);
   motor2.run(BACKWARD);
+  motor3.run(FORWARD);
+  motor4.run(BACKWARD);
   movement_num = 4;
 } 
 
@@ -96,6 +101,8 @@ void Stop()
 {
   motor1.run(RELEASE);
   motor2.run(RELEASE);
+  motor3.run(RELEASE);
+  motor4.run(RELEASE);
   movement_num = 5;
 }
 
