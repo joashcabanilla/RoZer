@@ -8,8 +8,25 @@ AF_DCMotor motor4(4, MOTOR34_1KHZ);
 
 char command = ' ';
 char mapping = 'N';
-int movement_num;
-int address;
+
+byte seq = 0;
+int fwd_Counter = -1;
+int lft_Counter = -1;
+int rgt_Counter = -1;
+int bwd_Counter = -1;
+int stp_Counter = -1;
+
+unsigned long int current_Time0 = 0;
+unsigned long int current_Time1 = 0;
+unsigned long int current_Time2 = 0;
+unsigned long int current_Time3 = 0;
+unsigned long int current_Time4 = 0;
+
+unsigned long int total_Fwd_Time[10];
+unsigned long int total_Lft_Time[10];
+unsigned long int total_Rgt_Time[10];
+unsigned long int total_Bwd_Time[10];
+unsigned long int total_Stp_Time[10];
 
 void setup() 
 {       
@@ -18,7 +35,6 @@ void setup()
   motor1.setSpeed(255);
   motor2.setSpeed(255);
   EEPROM.read(0) != 0 ? Saved_mapping() : movement();  
-  address = 0;
 }
 
 void loop()
@@ -29,8 +45,8 @@ void loop()
     Serial.println(command);
     if(command != 'D')
     {
-      command == 'W' ? mapping = 'Y' : command == 'w' ? mapping = 'N': command == 'X' ? mapping = 'C': command == 'V' ? mapping = 'S' : ' ';
-      mapping == 'C' ? Clear_mapping() : mapping == 'Y' ? Mapping() : mapping == 'S' ? Start_cleaning() : movement();
+      command == 'M' ? mapping = 'Y' : command == 'E' ? mapping = 'N': command == 'A' ? mapping = 'C': command == 'C' ? mapping = 'S' : command == 'L' ? mapping = 'Q' : ' ';
+      mapping == 'C' ? Clear_mapping() : mapping == 'Y' ? Mapping() : mapping == 'S' ? Start_cleaning() : mapping == 'Q' ? Stop_cleaning() : movement();
     }
     else
     {
@@ -45,7 +61,6 @@ void movement()
   motor2.setSpeed(255);
   motor3.setSpeed(255);
   motor4.setSpeed(255);
-  Stop();
   switch(command){
     case 'F':  
       forward();
@@ -59,6 +74,8 @@ void movement()
     case 'R':
       right();
       break;
+    case 'S':
+      Stop();
     }
 }
 void forward()
@@ -66,8 +83,7 @@ void forward()
   motor1.run(FORWARD);
   motor2.run(FORWARD);
   motor3.run(FORWARD);
-  motor4.run(FORWARD); 
-  movement_num = 1;
+  motor4.run(FORWARD);
 }
 
 void backward()
@@ -76,7 +92,6 @@ void backward()
   motor2.run(BACKWARD);
   motor3.run(BACKWARD);
   motor4.run(BACKWARD);
-  movement_num = 2;
 }
 
 void left()
@@ -85,7 +100,6 @@ void left()
   motor2.run(FORWARD);
   motor3.run(BACKWARD);
   motor4.run(FORWARD); 
-  movement_num = 3;
 }
 
 void right()
@@ -94,7 +108,6 @@ void right()
   motor2.run(BACKWARD);
   motor3.run(FORWARD);
   motor4.run(BACKWARD);
-  movement_num = 4;
 } 
 
 void Stop()
@@ -103,7 +116,6 @@ void Stop()
   motor2.run(RELEASE);
   motor3.run(RELEASE);
   motor4.run(RELEASE);
-  movement_num = 5;
 }
 
 void Disconnected()
@@ -113,36 +125,17 @@ void Disconnected()
 
 void Mapping()
 {
-  movement();
-  if(movement_num != 5)
-  {
-    EEPROM.write(address,movement_num);
-    address++;
-  }
+  
 }
 
 void Start_cleaning()
 {
-   for (int i = 0 ; i < EEPROM.length() ; i++) {
-    switch(EEPROM.read(i))
-    {
-      case 1: 
-        forward();
-        break;
-        
-      case 2: 
-        backward();
-        break;
-        
-      case 3: 
-        left();
-        break;
-        
-      case 4: 
-        right();
-        break;
-    }
-  }
+  
+}
+
+void Stop_cleaning()
+{
+  
 }
 
 void Saved_mapping()
@@ -150,9 +143,10 @@ void Saved_mapping()
   Serial.print("MAY NAKA SAVED NA ROOM MAPPING");
    //send data in bt module
 } 
+
 void Clear_mapping()
 {
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
+  for (int i = 0 ; i < EEPROM.length(); i++) {
     EEPROM.write(i, 0);
   }
 }
