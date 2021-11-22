@@ -10,18 +10,27 @@ char command = ' ';
 char mapping = 'N';
 
 int seq = 0;
-byte seq_movement = 0;
-unsigned long int current_time = 0;
-unsigned long int current_time1 = 0;
-unsigned long int current_time2 = 0;
-unsigned long int current_time3 = 0;
-unsigned long int current_time4 = 0;
-unsigned long int current_time5 = 0;
-byte delay_time1 = 0;
-byte delay_time2 = 0;
-byte delay_time3 = 0;
-byte delay_time4 = 0;
-byte delay_time5 = 0;
+int seq_Array[3500];
+
+int fwd_Counter = -1;
+int lft_Counter = -1;
+int rgt_Counter = -1;
+int bwd_Counter = -1;
+int stp_Counter = -1;
+
+unsigned long int current_Time0 = 0;
+unsigned long int current_Time1 = 0;
+unsigned long int current_Time2 = 0;
+unsigned long int current_Time3 = 0;
+unsigned long int current_Time4 = 0;
+
+unsigned long int total_Fwd_Time[10];
+unsigned long int total_Lft_Time[10];
+unsigned long int total_Rgt_Time[10];
+unsigned long int total_Bwd_Time[10];
+unsigned long int total_Stp_Time[10];
+
+
 void setup() 
 {       
   Serial.begin(9600);
@@ -76,7 +85,6 @@ void forward()
   motor2.run(FORWARD);
   motor3.run(FORWARD);
   motor4.run(FORWARD);
-  seq_movement = 1;
 }
 
 void backward()
@@ -85,7 +93,6 @@ void backward()
   motor2.run(BACKWARD);
   motor3.run(BACKWARD);
   motor4.run(BACKWARD);
-  seq_movement = 2;
 }
 
 void left()
@@ -94,7 +101,6 @@ void left()
   motor2.run(FORWARD);
   motor3.run(BACKWARD);
   motor4.run(FORWARD);
-  seq_movement = 3;
 }
 
 void right()
@@ -103,7 +109,6 @@ void right()
   motor2.run(BACKWARD);
   motor3.run(FORWARD);
   motor4.run(BACKWARD);
-  seq_movement = 4;
 } 
 
 void Stop()
@@ -112,7 +117,6 @@ void Stop()
   motor2.run(RELEASE);
   motor3.run(RELEASE);
   motor4.run(RELEASE);
-  seq_movement = 5;
 }
 
 void Disconnected()
@@ -123,41 +127,6 @@ void Disconnected()
 void Mapping()
 {
   movement();
-  current_time = millis();
-  Serial.println(current_time);
-  switch(seq_movement){
-      case 1: //forward
-        current_time1 = millis();
-        Serial.println(current_time1);
-        delay_time1 = (current_time - current_time1) / 1000;
-        Serial.println(delay_time1);
-        break;
-      case 2: //backward
-        current_time2 = millis();
-        Serial.println(current_time2);
-        delay_time2 = (current_time - current_time2) / 1000;
-        Serial.println(delay_time2);
-        break;
-      case 3: //left 
-        current_time3 = millis();
-        Serial.println(current_time3);
-        delay_time3 = (current_time - current_time3) / 1000;
-        Serial.println(delay_time3);
-        break;
-      case 4: //right
-        current_time4 = millis();
-        Serial.println(current_time4);
-        delay_time4 = (current_time - current_time4) / 1000;
-        Serial.println(delay_time4);
-        break;
-      case 5: //stop
-        current_time5 = millis();
-        Serial.println(current_time5);
-        delay_time5 = (current_time - current_time5) / 1000;
-        Serial.println(delay_time5);
-        break;
-    }
-  
 }
 
 void Start_cleaning()
