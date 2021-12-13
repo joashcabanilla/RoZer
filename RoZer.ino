@@ -7,26 +7,15 @@ AF_DCMotor motor3(3, MOTOR34_1KHZ);
 AF_DCMotor motor4(4, MOTOR34_1KHZ);
 
 char command = ' ';
-char mapping = ' ';
-
-int seq = 0;
-byte seq_movement = 0;
-float delay_time = 0.0000f;
-float current_time;
-float stop_time;
+char sanitize = 'N';
 
 void setup() 
 {       
   Serial.begin(9600);
   bt_serial.begin(9600);
-
-  //TESTING CLEAR MAPPING-----------------------------------------------------------------------
-  for (int i = 0 ; i < EEPROM.length(); i++) {
-    EEPROM.write(i, 0);
-  }
-  //----------------------------------------------------------------------------------------------
-  
-  EEPROM.read(0) != 0 ? Saved_mapping() : movement();  
+  EEPROM.write(0,0);
+  EEPROM.write(1,0);
+  EEPROM.write(2,0);
 }
 
 void loop()
@@ -34,11 +23,10 @@ void loop()
   if(bt_serial.available())
   {
     command = bt_serial.read();
-    //Serial.println(command);
     if(command != 'D')
     {
-      command == 'M' ? mapping = 'Y' : command == 'E' ? mapping = 'N': command == 'A' ? mapping = 'C': command == 'C' ? mapping = 'S' : command == 'T' ? mapping = 'Q' : ' ';
-      mapping == 'C' ? Clear_mapping() : mapping == 'Y' ? Mapping() : mapping == 'S' ? Start_cleaning() : mapping == 'Q' ? Stop_cleaning() : mapping == 'N' ? save_mapping(): movement();
+      command == 'C' ? sanitize = 'Y' : command == 'T' ? sanitize = 'N' : ' ';
+      sanitize == 'Y' ? start_sanitize() : stop_sanitize();
     }
     else
     {
@@ -49,10 +37,7 @@ void loop()
 
 void movement()
 {
-  motor1.setSpeed(200);
-  motor2.setSpeed(200);
-  motor3.setSpeed(200);
-  motor4.setSpeed(200);
+  motor_speed(200);
   Stop();
   switch(command){
     case 'F':  
@@ -114,63 +99,57 @@ void Disconnected()
   Stop();
 }
 
-void Mapping()
+void start_sanitize()
 {
-  Serial.println(command);
-  switch(command){
-    case 'F':  
-      forward();
-      seq_movement = 1;
-      current_time = millis();
-      Serial.println(current_time, 4);
-      break;
-    case 'B':  
-       backward();
-       seq_movement = 2;
-      break;
-    case 'L':  
-      left();
-      seq_movement = 3;
-      break;
-    case 'R':
-      right();
-      seq_movement = 4;
-      break;
-    case 'S':
+  motor_speed(150);
+  if(EEPROM.read(0) == 0 && EEPROM.read(1) == 0 && EEPROM.read(2) == 0)
+  {
+    Stop();
+    delay(100);
+    forward();
+    delay(3000);
+    Stop();
+    delay(1000);
+    byte random_turn = random(1,3);
+    for(int i = 0; i < 2; i++)
+    {
+      random_turn == 1 ? left() : right();
+      EEPROM.write(i,random_turn);
+      random_turn == 1 ? EEPROM.write(2,2) : EEPROM.write(2,1);
+      delay(300);
       Stop();
-      stop_time = millis();
-      Serial.println(stop_time, 4);
-      delay_time = (stop_time - current_time) / 1000;
-      Serial.println(delay_time, 4);
-      EEPROM.write(0,delay_time);
-      Serial.println(EEPROM.read(0),4);
-      break;
+      delay(100);
+      forward();
+      delay(1000);
+    }
+  } 
+  else
+  {
+    Stop();
+    delay(100);
+    EEPROM.read(2) == 2 ? right() : left();
+    delay(300);
+    clear_turn();
   }
 }
 
-void Start_cleaning()
+void stop_sanitize()
 {
+  clear_turn();
+  movement();
 }
 
-void Stop_cleaning()
+void motor_speed(int set_speed)
 {
-  mapping = ' ';
+    motor1.setSpeed(set_speed);
+    motor2.setSpeed(set_speed);
+    motor3.setSpeed(set_speed);
+    motor4.setSpeed(set_speed);
 }
 
-void Saved_mapping()
+void clear_turn()
 {
-  Serial.print("MAY NAKA SAVED NA ROOM MAPPING");
-   //send data in bt module
-} 
-
-void Clear_mapping()
-{
-  for (int i = 0 ; i < EEPROM.length(); i++) {
-    EEPROM.write(i, 0);
-  }
-}
-
-void save_mapping()
-{ 
-  
+  EEPROM.write(0,0);
+  EEPROM.write(1,0);
+  EEPROM.write(2,0);
 }
