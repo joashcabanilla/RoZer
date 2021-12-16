@@ -1,6 +1,8 @@
 #include <AFMotor.h>
 #include <EEPROM.h>
 #define bt_serial Serial1
+#define humi 20
+#define uv 21
 AF_DCMotor motor1(1, MOTOR12_1KHZ); 
 AF_DCMotor motor2(2, MOTOR12_1KHZ);
 AF_DCMotor motor3(3, MOTOR34_1KHZ);
@@ -13,9 +15,12 @@ void setup()
 {       
   Serial.begin(9600);
   bt_serial.begin(9600);
+  pinMode(humi,OUTPUT);
+  pinMode(uv,OUTPUT);
   EEPROM.write(0,0);
   EEPROM.write(1,0);
   EEPROM.write(2,0);
+  digitalWrite(humi,LOW);
 }
 
 void loop()
@@ -27,6 +32,7 @@ void loop()
     {
       command == 'C' ? sanitize = 'Y' : command == 'T' ? sanitize = 'N' : ' ';
       sanitize == 'Y' ? start_sanitize() : stop_sanitize();
+      command == 'H' ? humi_on_off(1) : command == 'I' ? humi_on_off(2) : command == 'U' ? uv_on_off(1) : command == 'V' ?  uv_on_off(2): movement();
     }
     else
     {
@@ -152,4 +158,29 @@ void clear_turn()
   EEPROM.write(0,0);
   EEPROM.write(1,0);
   EEPROM.write(2,0);
+}
+
+void humi_on_off(int humi_on)
+{
+  if(humi_on == 1)
+  {
+    digitalWrite(humi,LOW);
+    
+  }
+  else
+  {
+    digitalWrite(humi,HIGH);
+  }
+}
+
+void uv_on_off(int uv_on)
+{
+    if(uv_on == 1)
+  {
+    digitalWrite(uv,LOW);
+  }
+  else
+  {
+    digitalWrite(uv,HIGH);
+  }
 }
