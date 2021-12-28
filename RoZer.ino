@@ -3,6 +3,13 @@
 #define bt_serial Serial1
 #define humi 20
 #define uv 21
+#define echo1 22
+#define trig1 23
+#define echo2 24
+#define trig2 25
+#define echo3 26
+#define trig3 27
+
 AF_DCMotor motor1(1, MOTOR12_1KHZ); 
 AF_DCMotor motor2(2, MOTOR12_1KHZ);
 AF_DCMotor motor3(3, MOTOR34_1KHZ);
@@ -10,6 +17,8 @@ AF_DCMotor motor4(4, MOTOR34_1KHZ);
 
 char command = ' ';
 char sanitize = 'N';
+long duration1,duration2,duration3;
+int distance1,distance2,distance3;
 
 void setup() 
 {       
@@ -17,21 +26,27 @@ void setup()
   bt_serial.begin(9600);
   pinMode(humi,OUTPUT);
   pinMode(uv,OUTPUT);
+  pinMode(trig1,OUTPUT);
+  pinMode(echo1,INPUT);
+  pinMode(trig2,OUTPUT);
+  pinMode(echo2,INPUT);
+  pinMode(trig3,OUTPUT);
+  pinMode(echo3,INPUT);
   EEPROM.write(0,0);
   EEPROM.write(1,0);
-  EEPROM.write(2,0);
   digitalWrite(humi,LOW);
+  digitalWrite(uv,LOW);
 }
 
 void loop()
 {  
+  sanitize == 'Y' ? start_sanitize() : stop_sanitize();
   if(bt_serial.available())
   {
     command = bt_serial.read();
     if(command != 'D')
     {
       command == 'C' ? sanitize = 'Y' : command == 'T' ? sanitize = 'N' : ' ';
-      sanitize == 'Y' ? start_sanitize() : stop_sanitize();
       command == 'H' ? humi_on_off(1) : command == 'I' ? humi_on_off(2) : command == 'U' ? uv_on_off(1) : command == 'V' ?  uv_on_off(2): movement();
     }
     else
@@ -103,40 +118,18 @@ void Stop()
 void Disconnected()
 {
   Stop();
+  clear_turn();
+  humi_on_off(1);
+  uv_on_off(1);
+  sanitize = 'N';
 }
 
 void start_sanitize()
 {
   motor_speed(150);
-  if(EEPROM.read(0) == 0 && EEPROM.read(1) == 0 && EEPROM.read(2) == 0)
-  {
-    Stop();
-    delay(100);
-    forward();
-    delay(3000);
-    Stop();
-    delay(1000);
-    byte random_turn = random(1,3);
-    for(int i = 0; i < 2; i++)
-    {
-      random_turn == 1 ? left() : right();
-      EEPROM.write(i,random_turn);
-      random_turn == 1 ? EEPROM.write(2,2) : EEPROM.write(2,1);
-      delay(300);
-      Stop();
-      delay(100);
-      forward();
-      delay(1000);
-    }
-  } 
-  else
-  {
-    Stop();
-    delay(100);
-    EEPROM.read(2) == 2 ? right() : left();
-    delay(300);
-    clear_turn();
-  }
+  get_distance(23,1);
+  get_distance(25,2);
+  get_distance(27,3);
 }
 
 void stop_sanitize()
@@ -157,7 +150,6 @@ void clear_turn()
 {
   EEPROM.write(0,0);
   EEPROM.write(1,0);
-  EEPROM.write(2,0);
 }
 
 void humi_on_off(int humi_on)
@@ -183,4 +175,27 @@ void uv_on_off(int uv_on)
   {
     digitalWrite(uv,HIGH);
   }
+}
+
+void get_distance(int trig, int ultrasonic)
+{
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  switch(ultrasonic){
+      case 1:
+          duration1 = pulseIn(echo1, HIGH);
+          distance1 = duration1 * 0.034 / 2;
+          break;
+      case 2:
+          duration2 = pulseIn(echo2, HIGH);
+          distance2 = duration2 * 0.034 / 2;
+          break;
+      case 3:
+          duration3 = pulseIn(echo3, HIGH);
+          distance3 = duration3 * 0.034 / 2;
+          break;
+    }
 }
