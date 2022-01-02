@@ -19,6 +19,7 @@ char command = ' ';
 char sanitize = 'N';
 long duration1,duration2,duration3;
 int distance1,distance2,distance3;
+int randnumber;
 
 void setup() 
 {       
@@ -34,6 +35,7 @@ void setup()
   pinMode(echo3,INPUT);
   EEPROM.write(0,0);
   EEPROM.write(1,0);
+  EEPROM.write(2,0);
   digitalWrite(humi,LOW);
   digitalWrite(uv,LOW);
 }
@@ -130,6 +132,28 @@ void start_sanitize()
   get_distance(23,1);
   get_distance(25,2);
   get_distance(27,3);
+  if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
+  {
+    Serial.print("less than 30cm");
+    Stop();
+    delay(100);
+    distanceLess30cm();
+  }
+  else
+  {
+    Serial.print("greater than 30cm");
+    forward();
+    for(int i=0;i<=3000;i++)
+    {
+        get_distance(23,1);
+        get_distance(25,2);
+        get_distance(27,3);
+         if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
+         {
+            start_sanitize();
+         }
+    }
+  }
 }
 
 void stop_sanitize()
@@ -198,4 +222,9 @@ void get_distance(int trig, int ultrasonic)
           distance3 = duration3 * 0.034 / 2;
           break;
     }
+}
+
+void distanceLess30cm()
+{
+  
 }
