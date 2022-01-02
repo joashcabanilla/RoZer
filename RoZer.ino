@@ -174,6 +174,7 @@ void clear_turn()
 {
   EEPROM.write(0,0);
   EEPROM.write(1,0);
+  EEPROM.write(2,0);
 }
 
 void humi_on_off(int humi_on)
