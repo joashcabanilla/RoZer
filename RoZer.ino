@@ -135,13 +135,13 @@ void start_sanitize()
   if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
   {
     Serial.print("less than 30cm");
-    Stop();
-    delay(100);
     distanceLess30cm();
   }
   else
   {
     Serial.print("greater than 30cm");
+    Stop();
+    delay(100);
     forward();
     for(int i=0;i<=3000;i++)
     {
@@ -150,8 +150,21 @@ void start_sanitize()
         get_distance(27,3);
          if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
          {
-            start_sanitize();
+            distanceLess30cm();
          }
+    }
+    Stop();
+    delay(100);
+    if(EEPROM.read(0) == 0 && EEPROM.read(1) == 0)
+    {
+      randnumber = random(1,3);
+      randnumber == 1 ? left() : right();
+      EEPROM.write(0,randnumber);
+      delay(300);      
+    }
+    else 
+    {
+      
     }
   }
 }
@@ -227,5 +240,7 @@ void get_distance(int trig, int ultrasonic)
 
 void distanceLess30cm()
 {
+  Stop();
+  delay(100);
   
 }
