@@ -60,25 +60,28 @@ void loop()
 
 void movement()
 {
-  motor_speed(200);
-  Stop();
-  switch(command){
-    case 'F':  
-      forward();
-      break;
-    case 'B':  
-       backward();
-      break;
-    case 'L':  
-      left();
-      break;
-    case 'R':
-      right();
-      break;
-  }
+ if(sanitize == 'N')
+ {
+    Stop();
+    switch(command){
+      case 'F':
+        forward();
+        break;
+      case 'B':
+         backward();
+        break;
+      case 'L': 
+        left();
+        break;
+      case 'R':
+        right();
+        break;
+    }
+ }
 }
 void forward()
 {
+  motor_speed(150);  
   motor1.run(FORWARD);
   motor2.run(FORWARD);
   motor3.run(FORWARD);
@@ -87,6 +90,7 @@ void forward()
 
 void backward()
 {
+  motor_speed(150);  
   motor1.run(BACKWARD);
   motor2.run(BACKWARD);
   motor3.run(BACKWARD);
@@ -95,6 +99,7 @@ void backward()
 
 void left()
 {
+  motor_speed(225);
   motor1.run(BACKWARD);
   motor2.run(FORWARD);
   motor3.run(BACKWARD);
@@ -103,6 +108,7 @@ void left()
 
 void right()
 {
+  motor_speed(225); 
   motor1.run(FORWARD);
   motor2.run(BACKWARD);
   motor3.run(FORWARD);
@@ -128,45 +134,91 @@ void Disconnected()
 
 void start_sanitize()
 {
-  motor_speed(150);
-  get_distance(23,1);
-  get_distance(25,2);
-  get_distance(27,3);
-  if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
+  Stop();
+  delay(500);
+  forward();
+  delay(2500);
+  Stop();
+  delay(500);
+  if(EEPROM.read(0) == 0)
   {
-    Serial.print("less than 30cm");
-    distanceLess30cm();
+   randnumber = random(1,3);
+   randnumber == 1 ? left() : right();
+   EEPROM.write(0,randnumber);
+   delay(1000); 
   }
   else
   {
-    Serial.print("greater than 30cm");
-    Stop();
-    delay(100);
-    forward();
-    for(int i=0;i<=3000;i++)
-    {
-        get_distance(23,1);
-        get_distance(25,2);
-        get_distance(27,3);
-         if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
-         {
-            distanceLess30cm();
-         }
-    }
-    Stop();
-    delay(100);
-    if(EEPROM.read(0) == 0 && EEPROM.read(1) == 0)
+    if(EEPROM.read(1) == 0)
     {
       randnumber = random(1,3);
       randnumber == 1 ? left() : right();
-      EEPROM.write(0,randnumber);
-      delay(300);      
+      EEPROM.write(1,randnumber);
+      delay(1000); 
     }
-    else 
+    else
     {
-      
+      if(EEPROM.read(0) == 1 && EEPROM.read(0) == 1)
+      {
+        right();
+        delay(1000);
+        clear_turn();
+      }
+      else if(EEPROM.read(0) == 2 && EEPROM.read(0) == 2)
+      {
+        left();
+        delay(1000);
+        clear_turn();
+      }
+      else
+      {
+        clear_turn();
+        randnumber = random(1,3);
+        randnumber == 1 ? left() : right();
+        EEPROM.write(0,randnumber);
+        delay(1000); 
+      }
     }
   }
+  
+//  get_distance(23,1);
+//  get_distance(25,2);
+//  get_distance(27,3);
+//  if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
+//  {
+//    Serial.print("less than 30cm");
+//    distanceLess30cm();
+//  }
+//  else
+//  {
+//    Serial.print("greater than 30cm");
+//    Stop();
+//    delay(100);
+//    forward();
+//    for(int i=0;i<=3000;i++)
+//    {
+//        get_distance(23,1);
+//        get_distance(25,2);
+//        get_distance(27,3);
+//         if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
+//         {
+//            distanceLess30cm();
+//         }
+//    }
+//    Stop();
+//    delay(100);
+//    if(EEPROM.read(0) == 0 && EEPROM.read(1) == 0)
+//    {
+//      randnumber = random(1,3);
+//      randnumber == 1 ? left() : right();
+//      EEPROM.write(0,randnumber);
+//      delay(300);      
+//    }
+//    else 
+//    {
+//      
+//    }
+//  }
 }
 
 void stop_sanitize()
