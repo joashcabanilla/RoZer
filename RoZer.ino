@@ -16,7 +16,7 @@ AF_DCMotor motor3(3, MOTOR34_1KHZ);
 AF_DCMotor motor4(4, MOTOR34_1KHZ);
 
 char command = ' ';
-char sanitize = 'N';
+char sanitize = 'N'; 
 long duration1,duration2,duration3;
 int distance1,distance2,distance3;
 int randnumber;
@@ -79,36 +79,36 @@ void movement()
     }
  }
 }
-void forward()
+void backward()
 {
-  motor_speed(150);  
+  motor_speed(255);  
   motor1.run(FORWARD);
   motor2.run(FORWARD);
   motor3.run(FORWARD);
   motor4.run(FORWARD);
 }
 
-void backward()
+void forward()
 {
-  motor_speed(150);  
+  motor_speed(255);  
   motor1.run(BACKWARD);
   motor2.run(BACKWARD);
   motor3.run(BACKWARD);
   motor4.run(BACKWARD);
 }
 
-void left()
+void right()
 {
-  motor_speed(225);
+  motor_speed(255);
   motor1.run(BACKWARD);
   motor2.run(FORWARD);
   motor3.run(BACKWARD);
   motor4.run(FORWARD);
 }
 
-void right()
+void left()
 {
-  motor_speed(225); 
+  motor_speed(255); 
   motor1.run(FORWARD);
   motor2.run(BACKWARD);
   motor3.run(FORWARD);
