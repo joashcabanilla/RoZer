@@ -1,0 +1,6 @@
+Next is our device mapping algorithm. Our device is capable of detecting the distance between our device and an obstacle. Then we used this ability of our device to create a pattern.That's why our device mapping consists of 2 patterns which are the pattern for without obstacle and pattern with obstacle. So let's proceed to the pattern without obstacles first……please play the video.
+
+so yung logic ng pattern po…is una mag start yung device sa forward movement in 3 seconds….then habang nakaforward yung device…. Yung device po namin ay continuous magchecheck ng distance sa front area to check if there is an obstacle.. Then after 3seconds forward….our device will randomly turn left or right…Then forward ulit ng 3seconds…so yung pattern po is kapag nakadalawang beses na parehas na turn yung device.. Automatically mag tuturn yung device ng opposite direction… para maiwasan yung pag balik ng device kung san nag start yung sanitizing…so example po is 2 left turn..then next turn will right turn….
+
+Next is pattern with obstacle
+So yung logic po sa pattern with obstacle….habang naka forward movement po yung device… Yung device po ay continuous magchecheck ng distance sa front area to check if there is an obstacle….Then if our device detected an obstacle…our device will make a turn until makahanap ng path yung device na walang obstacle.

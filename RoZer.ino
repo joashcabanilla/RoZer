@@ -7,8 +7,6 @@
 #define trig1 23
 #define echo2 24
 #define trig2 25
-#define echo3 26
-#define trig3 27
 
 AF_DCMotor motor1(1, MOTOR12_1KHZ); 
 AF_DCMotor motor2(2, MOTOR12_1KHZ);
@@ -17,8 +15,8 @@ AF_DCMotor motor4(4, MOTOR34_1KHZ);
 
 char command = ' ';
 char sanitize = 'N'; 
-long duration1,duration2,duration3;
-int distance1,distance2,distance3;
+long duration1,duration2;
+int distance1,distance2;
 int randnumber;
 
 void setup() 
@@ -31,11 +29,8 @@ void setup()
   pinMode(echo1,INPUT);
   pinMode(trig2,OUTPUT);
   pinMode(echo2,INPUT);
-  pinMode(trig3,OUTPUT);
-  pinMode(echo3,INPUT);
   EEPROM.write(0,0);
   EEPROM.write(1,0);
-  EEPROM.write(2,0);
   digitalWrite(humi,LOW);
   digitalWrite(uv,LOW);
 }
@@ -136,8 +131,30 @@ void start_sanitize()
 {
   Stop();
   delay(500);
+  get_distance(23,1);
+  get_distance(25,2);
+  if(distance1 <= 30 || distance2 <= 30)
+  {
+    distanceLess30cm();
+  }
+  else
+  {
+    pattern_without_obs();
+  }
+}
+
+void pattern_without_obs()
+{
   forward();
-  delay(2500);
+      for(int i=0;i<=3000;i++)
+    {
+        get_distance(23,1);
+        get_distance(25,2);
+         if(distance1 <= 30 || distance2 <= 30)
+         {
+            distanceLess30cm();
+         }
+    }
   Stop();
   delay(500);
   if(EEPROM.read(0) == 0)
@@ -158,13 +175,13 @@ void start_sanitize()
     }
     else
     {
-      if(EEPROM.read(0) == 1 && EEPROM.read(0) == 1)
+      if(EEPROM.read(0) == 1 && EEPROM.read(1) == 1)
       {
         right();
         delay(1000);
         clear_turn();
       }
-      else if(EEPROM.read(0) == 2 && EEPROM.read(0) == 2)
+      else if(EEPROM.read(0) == 2 && EEPROM.read(1) == 2)
       {
         left();
         delay(1000);
@@ -172,53 +189,14 @@ void start_sanitize()
       }
       else
       {
-        clear_turn();
+        EEPROM.update(0,EEPROM.read(1));
         randnumber = random(1,3);
         randnumber == 1 ? left() : right();
-        EEPROM.write(0,randnumber);
+        EEPROM.update(1,randnumber);
         delay(1000); 
       }
     }
   }
-  
-//  get_distance(23,1);
-//  get_distance(25,2);
-//  get_distance(27,3);
-//  if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
-//  {
-//    Serial.print("less than 30cm");
-//    distanceLess30cm();
-//  }
-//  else
-//  {
-//    Serial.print("greater than 30cm");
-//    Stop();
-//    delay(100);
-//    forward();
-//    for(int i=0;i<=3000;i++)
-//    {
-//        get_distance(23,1);
-//        get_distance(25,2);
-//        get_distance(27,3);
-//         if(distance1 <= 30 || distance2 <= 30 || distance3 <= 30)
-//         {
-//            distanceLess30cm();
-//         }
-//    }
-//    Stop();
-//    delay(100);
-//    if(EEPROM.read(0) == 0 && EEPROM.read(1) == 0)
-//    {
-//      randnumber = random(1,3);
-//      randnumber == 1 ? left() : right();
-//      EEPROM.write(0,randnumber);
-//      delay(300);      
-//    }
-//    else 
-//    {
-//      
-//    }
-//  }
 }
 
 void stop_sanitize()
@@ -239,7 +217,6 @@ void clear_turn()
 {
   EEPROM.write(0,0);
   EEPROM.write(1,0);
-  EEPROM.write(2,0);
 }
 
 void humi_on_off(int humi_on)
@@ -283,16 +260,13 @@ void get_distance(int trig, int ultrasonic)
           duration2 = pulseIn(echo2, HIGH);
           distance2 = duration2 * 0.034 / 2;
           break;
-      case 3:
-          duration3 = pulseIn(echo3, HIGH);
-          distance3 = duration3 * 0.034 / 2;
-          break;
     }
 }
 
 void distanceLess30cm()
 {
   Stop();
-  delay(100);
-  
+  delay(500);
+  left();
+  delay(1000);
 }
