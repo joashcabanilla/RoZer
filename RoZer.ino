@@ -133,9 +133,16 @@ void start_sanitize()
   delay(500);
   get_distance(23,1);
   get_distance(25,2);
-  if(distance1 <= 30 || distance2 <= 30)
+  if(distance1 != 0 && distance2 != 0)
   {
-    distanceLess30cm();
+    if(distance1 <= 30 || distance2 <= 30)
+    {
+      distanceLess30cm(); 
+    }
+    else
+    {
+      pattern_without_obs();
+    }
   }
   else
   {
@@ -150,10 +157,13 @@ void pattern_without_obs()
     {
         get_distance(23,1);
         get_distance(25,2);
-         if(distance1 <= 30 || distance2 <= 30)
-         {
-            distanceLess30cm();
-         }
+        if(distance1 != 0 && distance2 != 0)
+        {
+          if(distance1 <= 30 || distance2 <= 30)
+          {
+            distanceLess30cm(); 
+          }
+        }
     }
   Stop();
   delay(500);
