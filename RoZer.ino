@@ -8,13 +8,14 @@
 #define echo2 24
 #define trig2 25
 
-AF_DCMotor motor1(1, MOTOR12_1KHZ); 
-AF_DCMotor motor2(2, MOTOR12_1KHZ);
-AF_DCMotor motor3(3, MOTOR34_1KHZ);
-AF_DCMotor motor4(4, MOTOR34_1KHZ);
+AF_DCMotor motor1(1,MOTOR12_8KHZ); 
+AF_DCMotor motor2(2,MOTOR12_8KHZ);
+AF_DCMotor motor3(3,MOTOR12_8KHZ);
+AF_DCMotor motor4(4,MOTOR12_8KHZ);
 
 char command = ' ';
 char sanitize = 'N'; 
+char move_left_right = ' ';
 long duration1,duration2;
 int distance1,distance2;
 int randnumber;
@@ -23,7 +24,7 @@ void setup()
 {       
   Serial.begin(9600);
   bt_serial.begin(9600);
-  pinMode(humi,OUTPUT);
+  pinMode(humi,OUTPUT); 
   pinMode(uv,OUTPUT);
   pinMode(trig1,OUTPUT);
   pinMode(echo1,INPUT);
@@ -33,6 +34,7 @@ void setup()
   EEPROM.write(1,0);
   digitalWrite(humi,LOW);
   digitalWrite(uv,LOW);
+  motor_speed(255);
 }
 
 void loop()
@@ -57,6 +59,25 @@ void movement()
 {
  if(sanitize == 'N')
  {
+   if(command == 'L' || command == 'R')
+    {
+      move_left_right = command;
+    }
+    else if(command == 'F' || command == 'B')
+    {
+      move_left_right = ' ';
+    }
+    
+  if(move_left_right == 'L')
+  {
+      left();
+  }
+  else if(move_left_right == 'R')
+  {
+    right(); 
+  }
+  else
+  {
     Stop();
     switch(command){
       case 'F':
@@ -65,50 +86,10 @@ void movement()
       case 'B':
          backward();
         break;
-      case 'L': 
-        left();
-        break;
-      case 'R':
-        right();
-        break;
     }
+   }
  }
 }
-void backward()
-{
-  motor_speed(255);  
-  motor1.run(FORWARD);
-  motor2.run(FORWARD);
-  motor3.run(FORWARD);
-  motor4.run(FORWARD);
-}
-
-void forward()
-{
-  motor_speed(255);  
-  motor1.run(BACKWARD);
-  motor2.run(BACKWARD);
-  motor3.run(BACKWARD);
-  motor4.run(BACKWARD);
-}
-
-void right()
-{
-  motor_speed(255);
-  motor1.run(BACKWARD);
-  motor2.run(FORWARD);
-  motor3.run(BACKWARD);
-  motor4.run(FORWARD);
-}
-
-void left()
-{
-  motor_speed(255); 
-  motor1.run(FORWARD);
-  motor2.run(BACKWARD);
-  motor3.run(FORWARD);
-  motor4.run(BACKWARD);
-} 
 
 void Stop()
 {
@@ -117,6 +98,40 @@ void Stop()
   motor3.run(RELEASE);
   motor4.run(RELEASE);
 }
+
+void backward()
+{  
+  motor1.run(FORWARD);
+  motor2.run(FORWARD);
+  motor3.run(FORWARD);
+  motor4.run(FORWARD);
+}
+
+void forward()
+{  
+  motor1.run(BACKWARD);
+  motor2.run(BACKWARD);
+  motor3.run(BACKWARD);
+  motor4.run(BACKWARD);
+}
+
+void right()
+{
+  motor1.run(BACKWARD);
+  motor2.run(RELEASE);
+  motor3.run(BACKWARD);
+  motor4.run(FORWARD);
+}
+
+void left()
+{
+  motor1.run(RELEASE);
+  motor2.run(BACKWARD);
+  motor3.run(FORWARD);
+  motor4.run(BACKWARD);
+}  
+
+
 
 void Disconnected()
 {
@@ -212,7 +227,7 @@ void pattern_without_obs()
 void stop_sanitize()
 {
   clear_turn();
-  movement();
+//  movement();
 }
 
 void motor_speed(int set_speed)
